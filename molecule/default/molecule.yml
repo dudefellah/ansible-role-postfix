@@ -13,7 +13,7 @@ platforms:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     command: /usr/sbin/init
   - name: centos-8-postfix
-    image: centos:centos8
+    image: rockylinux:8
     tmpfs:
       - /run
       - /tmp

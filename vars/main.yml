@@ -4,3 +4,6 @@ __postfix_packages:
   centos:
     default:
       - postfix
+  rocky:
+    default:
+      - postfix

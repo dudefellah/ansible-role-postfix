@@ -1,0 +1,9 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "Include ansible-role-postfix"
+      include_role:
+        name: "ansible-role-postfix"
+      vars:
+        postfix_service_name: null  # Docker and systemd is painful...

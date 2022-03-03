@@ -1,0 +1,70 @@
+---
+# tasks file for ansible-role-postfix
+- name: Get role facts
+  include_tasks: gather_facts.yml
+
+- name: Install packages
+  package:
+    name: "{{ _postfix_packages }}"
+    state: present
+  tags:
+    - packages
+
+- name: Install postfix config files
+  template:
+    src: postfix.cf.j2
+    dest: >-
+      {%- if __postfix_cf.key.startswith('/') -%}
+      {{ __postfix_cf.key }}
+      {%- else -%}
+      {{ postfix_etc_path }}/{{ __postfix_cf.key }}
+      {%- endif -%}
+    mode: "{{ __postfix_cf.value.mode | default('0644') }}"
+    owner: "{{ __postfix_cf.value.owner | default('root') }}"
+    group: "{{ __postfix_cf.value.group | default('root') }}"
+  vars:
+    content: "{{ __postfix_cf.value.content }}"
+  notify:
+    - "postfix restart service"
+  loop: "{{ postfix_configs | default({}) | dict2items }}"
+  loop_control:
+    loop_var: __postfix_cf
+
+- name: Configure aliases
+  template:
+    src: aliases.j2
+    dest: "{{ postfix_aliases_path }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  notify: "postfix newaliases"
+
+# Skip changed check. The role will be 'changed' when these files are changed
+# pre-postmap, so it won't hurt to ignore the change here.
+- name: Postmap files
+  command: >-
+    postmap {% if __postfix_postmap_filename.startswith('/') -%}
+    {{ __postfix_postmap_filename }}
+    {%- else -%}
+    {{ postfix_etc_path }}/{{ __postfix_postmap_filename }}
+    {%- endif %}
+  changed_when: false
+  loop: "{{ postfix_postmap_files }}"
+  loop_control:
+    loop_var: __postfix_postmap_filename
+
+- name: Set the service state
+  service:
+    name: "{{ postfix_service_name }}"
+    state: "{{ postfix_service_state }}"
+  when:
+    - "postfix_service_name is not none"
+    - "postfix_service_state is not none"
+
+- name: Enable/disable the service
+  service:
+    name: "{{ postfix_service_name }}"
+    enabled: "{{ postfix_service_enabled }}"
+  when:
+    - "postfix_service_name is not none"
+    - "postfix_service_enabled is not none"

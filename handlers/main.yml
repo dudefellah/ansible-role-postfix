@@ -1,0 +1,14 @@
+---
+# handlers file for ansible-role-postfix
+- name: Restart/Reload postfix
+  service:
+    name: "{{ postfix_service_name }}"
+    state: "{{ postfix_service_restarted_state }}"
+  listen: "postfix restart service"
+  when:
+    - "postfix_service_name is not none"
+    - "postfix_service_restarted_state is not none"
+
+- name: Run 'newaliases'
+  command: "{{ postfix_newaliases_path }}"
+  listen: "postfix newaliases"

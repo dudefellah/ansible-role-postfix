@@ -1,0 +1,5 @@
+# {{ ansible_managed }}
+
+{% for a in postfix_aliases %}
+{{ a.name }}: {{ a["values"] | join(',') }}
+{% endfor %}

@@ -1,0 +1,352 @@
+---
+# defaults file for ansible-role-postfix
+#
+# A list of packages to install when running this role. The null value implies
+# that this role will try to figure out what's suitable for your platform. To
+# install a custom set of packages, define this as a list of values. To avoid
+# installing anything, use an empty list here.
+postfix_packages: null
+
+# The name of the service to supply to the handler and when setting the service
+# state. If set to null, no restart/reload will be attempted as a result of
+# changes, and the service state won't be affected at the end of this role.
+postfix_service_name: postfix
+
+# This is the intended state of the postfix service once this role has run its
+# course. If set to null, no action will be attempted to modify the service
+# state.
+postfix_service_state: started
+
+# Set to enable/disable the postfix service one this role has run its course.
+# If set to null, no action will be taken to enable/disable the service.
+postfix_service_enabled: true
+
+# The service 'restarted' state that will be used in the handler. This can be
+# any acceptable Ansible service module state.
+postfix_service_restarted_state: restarted
+
+# The postfix config dir. If you specify a postfix_configs filename without
+# an absolute path, it will be placed under this directory
+postfix_etc_path: /etc/postfix
+
+# A list of files to run `postmap` against when the role has finished.
+postfix_postmap_files: []
+
+# A dict of configs to be installed on the system. As mentioned above, relative
+# paths will be installed under `postfix_etc_path`. Absolute paths will be
+# installed where they're specified.
+#
+# Each dict item can include `contents` value for the config file contents,
+# a `mode` for permissions, `owner` for file owner and `group` for file group
+# owner. Defaults are:
+#
+# mode: "0644"
+# owner: root
+# group: root
+postfix_configs:
+  main.cf:
+    content: |
+      # Ansible managed
+      disable_vrfy_command = yes
+      # smtpd_banner = $myhostname ESMTP $mail_name
+      biff = no
+
+      # appending .domain is the MUA's job.
+      append_dot_mydomain = no
+
+      inet_interfaces = all
+      inet_protocols = all
+
+      # Default is to take the fqdn for the local machine
+      myhostname = myhostname.example.com
+      myorigin = $myhostname
+      mydestination = $myhostname localhost.$mydomain localhost
+      mynetworks = 127.0.0.0/8
+
+      smtpd_recipient_restrictions = reject_unauth_destination
+
+      masquerade_classes = envelope_sender, envelope_recipient, header_sender, header_recipient
+      masquerade_domains = $myhostname.$mydomain
+
+      mailbox_size_limit = 0
+      recipient_delimiter = +
+
+      mailbox_size_limit = 0
+      message_size_limit = 0
+      queue_minfree = 100000000
+      unknown_local_recipient_reject_code = 550
+      recipient_delimiter = +
+
+      alias_maps = hash:/etc/aliases
+      alias_database = hash:/etc/aliases
+
+      setgid_group = postdrop
+      html_directory = no
+
+      queue_directory = /var/spool/postfix
+      command_directory = /usr/sbin
+      daemon_directory = /usr/libexec/postfix
+      data_directory = /var/lib/postfix
+      manpage_directory = /usr/share/man
+      sample_directory = no
+      readme_directory = no
+
+      sendmail_path = /usr/sbin/sendmail.postfix
+      newaliases_path = /usr/bin/newaliases.postfix
+      mailq_path = /usr/bin/mailq.postfix
+
+      mail_owner = postfix
+      debug_peer_level = 2
+      debugger_command =
+           PATH=/bin:/usr/bin:/usr/local/bin:/usr/X11R6/bin
+           ddd $daemon_directory/$process_name $process_id & sleep 5
+
+
+# Path of the newaliases binary to run after updating aliases
+postfix_newaliases_path: /usr/bin/newaliases
+
+# Destination file for mail liases
+postfix_aliases_path: /etc/aliases
+
+# Mail aliases list.
+# Each list element should have a `name` element and a `values` array with at
+# least one value. Each element will be output like this:
+#
+# {{ item.name }}: {{ item.values | join(',') }}
+#
+# ... 'values' is a built-in keyword for Ansible, but I like it as a key for the
+# alias values enough that I'm keeping it. Just remember that if you're going
+# to refer to any of the 'values' in the list, you need to use regular Python
+# dict notation (eg. myvalue["values"]) rather than using a dot with class
+# object-style notation (eg. myvalue.values)
+postfix_aliases:
+  - name: mailer-daemon
+    values:  postmaster
+  - name: postmaster
+    values:
+      - root
+  - name: bin
+    values:
+      - root
+  - name: daemon
+    values:
+      - root
+  - name: adm
+    values:
+      - root
+  - name: lp
+    values:
+      - root
+  - name: sync
+    values:
+      - root
+  - name: shutdown
+    values:
+      - root
+  - name: halt
+    values:
+      - root
+  - name: mail
+    values:
+      - root
+  - name: news
+    values:
+      - root
+  - name: uucp
+    values:
+      - root
+  - name: operator
+    values:
+      - root
+  - name: games
+    values:
+      - root
+  - name: gopher
+    values:
+      - root
+  - name: ftp
+    values:
+      - root
+  - name: nobody
+    values:
+      - root
+  - name: radiusd
+    values:
+      - root
+  - name: nut
+    values:
+      - root
+  - name: dbus
+    values:
+      - root
+  - name: vcsa
+    values:
+      - root
+  - name: canna
+    values:
+      - root
+  - name: wnn
+    values:
+      - root
+  - name: rpm
+    values:
+      - root
+  - name: nscd
+    values:
+      - root
+  - name: pcap
+    values:
+      - root
+  - name: apache
+    values:
+      - root
+  - name: webalizer
+    values:
+      - root
+  - name: dovecot
+    values:
+      - root
+  - name: fax
+    values:
+      - root
+  - name: quagga
+    values:
+      - root
+  - name: radvd
+    values:
+      - root
+  - name: pvm
+    values:
+      - root
+  - name: amandabackup
+    values:
+      - root
+  - name: privoxy
+    values:
+      - root
+  - name: ident
+    values:
+      - root
+  - name: named
+    values:
+      - root
+  - name: xfs
+    values:
+      - root
+  - name: gdm
+    values:
+      - root
+  - name: mailnull
+    values:
+      - root
+  - name: postgres
+    values:
+      - root
+  - name: sshd
+    values:
+      - root
+  - name: smmsp
+    values:
+      - root
+  - name: postfix
+    values:
+      - root
+  - name: netdump
+    values:
+      - root
+  - name: ldap
+    values:
+      - root
+  - name: squid
+    values:
+      - root
+  - name: ntp
+    values:
+      - root
+  - name: mysql
+    values:
+      - root
+  - name: desktop
+    values:
+      - root
+  - name: rpcuser
+    values:
+      - root
+  - name: rpc
+    values:
+      - root
+  - name: nfsnobody
+    values:
+      - root
+  - name: pcp
+    values:
+      - root
+  - name: ingres
+    values:
+      - root
+  - name: system
+    values:
+      - root
+  - name: toor
+    values:
+      - root
+  - name: manager
+    values:
+      - root
+  - name: dumper
+    values:
+      - root
+  - name: abuse
+    values:
+      - root
+  - name: newsadm
+    values:
+      - news
+  - name: newsadmin
+    values:
+      - news
+  - name: usenet
+    values:
+      - news
+  - name: ftpadm
+    values:
+      - ftp
+  - name: ftpadmin
+    values:
+      - ftp
+  - name: ftp-adm
+    values:
+      - ftp
+  - name: ftp-admin
+    values:
+      - ftp
+  - name: www
+    values:
+      - webmaster
+  - name: webmaster
+    values:
+      - root
+  - name: noc
+    values:
+      - root
+  - name: security
+    values:
+      - root
+  - name: hostmaster
+    values:
+      - root
+  - name: info
+    values:
+      - postmaster
+  - name: marketing
+    values:
+      - postmaster
+  - name: sales
+    values:
+      - postmaster
+  - name: support
+    values:
+      - postmaster
+  - name: decode
+    values:
+      - root

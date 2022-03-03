@@ -1,0 +1,6 @@
+---
+# vars file for ansible-role-postfix
+__postfix_packages:
+  centos:
+    default:
+      - postfix

@@ -121,7 +121,8 @@ postfix_aliases_path: /etc/aliases
 # object-style notation (eg. myvalue.values)
 postfix_aliases:
   - name: mailer-daemon
-    values:  postmaster
+    values:
+      - postmaster
   - name: postmaster
     values:
       - root
